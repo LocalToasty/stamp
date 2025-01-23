@@ -141,8 +141,8 @@ def tiles_with_cache(
                 Path(tmp_cache_file.name).unlink(missing_ok=True)
                 raise e
 
-    # We have written the entire file, time to rename it to its final name.
-    Path(tmp_cache_file.name).rename(cache_file_path)
+            # We have written the entire file, time to rename it to its final name.
+            Path(tmp_cache_file.name).rename(cache_file_path)
 
 
 def _tiles_with_tissue(
@@ -260,7 +260,7 @@ def _has_enough_texture(tile: Image.Image) -> bool:
     # if "at least two precent of our image are edges",
     # we deem it to have enough texture
     return bool(edge_score > 0.02)
-
+    #return True
 
 def _supertiles(
     slide: openslide.OpenSlide,

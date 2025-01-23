@@ -9,12 +9,12 @@ parser.add_argument('-m','--magnification', type=int, required=True, help='Magni
 args = parser.parse_args()
 
 # Update directories based on magnification
-base_output_dir = f"/data/horse/ws/s1787956-TCGA/features/features-{args.magnification}x"
-base_cache_dir = f"/data/horse/ws/s1787956-TCGA/Cache/Cache-{args.magnification}x"
-config_dir = f"/data/horse/ws/s1787956-cobra-horse/code/stamp/src/stamp/configs-{args.magnification}x"
-job_dir = f"/data/horse/ws/s1787956-cobra-horse/code/stamp/jobs/tcga-{args.magnification}x"
+base_output_dir = f"/data/cat/ws/s1787956-cobra/data/features-cptac/features-{args.magnification}x"
+base_cache_dir = f"/data/cat/ws/s1787956-cobra/data/Cache-CPTAC/Cache-{args.magnification}x"
+config_dir = f"/data/horse/ws/s1787956-cobra-horse/code/stamp/src/stamp/configs-cptac-{args.magnification}x"
+job_dir = f"/data/horse/ws/s1787956-cobra-horse/code/stamp/jobs/cptac-{args.magnification}x"
 
-base_wsi_dir = "/data/horse/ws/s1787956-TCGA/WSI"
+base_wsi_dir = "/data/cat/ws/s1787956-cobra/data/CPTAC-WSI"
 
 # Create directories if they don't exist
 if not os.path.exists(base_output_dir):
@@ -38,7 +38,7 @@ base_config = {
         'cache_dir': "",
         'tile_size_um': mag_dict[str(args.magnification)],
         'tile_size_px': 224,
-        'max_workers': 12
+        'max_workers': 14
     }
 }
 
@@ -46,9 +46,7 @@ base_config = {
 feature_extractors = ["ctranspath","dinoSSL","virchow2","mahmood-uni", 
                       "mahmood-conch","h_optimus_0","gigapath"] # google model is tf so would avoid.. 
 cohorts = [
-    "GBM", "LGG", "BLCA", "LUAD", "BRCA", "DLBC", "CHOL", "ESCA", "CRC", "CESC", 
-    "UCS", "UCEC", "THYM", "THCA", "TGCT", "STAD", "SKCM", "SARC", "PRAD", "PCPG", 
-    "PAAD", "OV", "MESO", "LUSC", "LIHC", "KIRP", "KIRC", "KICH", "HNSC"
+    "BRCA", "COAD", "LUAD", "LUSC", "LSCC", "HNSCC", "OV", "UCEC", "GBM", "CCRCC", "PDA"
 ]
 
 # Define the directories
@@ -66,13 +64,13 @@ os.makedirs(job_dir, exist_ok=True)
 for extractor in tqdm(feature_extractors):
     for cohort in tqdm(cohorts,leave=False):
         config = base_config.copy()
-        config['preprocessing']['output_dir'] = f"{base_output_dir}/{extractor}/TCGA-{cohort}"
-        config['preprocessing']['wsi_dir'] = f"{base_wsi_dir}/TCGA-{cohort}-DX-IMGS/data-{cohort}"
+        config['preprocessing']['output_dir'] = f"{base_output_dir}/{extractor}/CPTAC-{cohort}"
+        config['preprocessing']['wsi_dir'] = f"{base_wsi_dir}/CPTAC-{cohort}/data"
         config['preprocessing']['extractor'] = extractor
-        config['preprocessing']['cache_dir'] = f"{base_cache_dir}/TCGA-{cohort}"
+        config['preprocessing']['cache_dir'] = f"{base_cache_dir}/CPTAC-{cohort}"
 
-        config_filename = f"{config_dir}/config_{extractor}_{cohort}.yaml"
-        job_filename = f"{job_dir}/job_{extractor}_{cohort}.sh"
+        config_filename = f"{config_dir}/config_{extractor}_cptac_{cohort}.yaml"
+        job_filename = f"{job_dir}/job_{extractor}_cptac_{cohort}.sh"
 
         # Save the config file
         with open(config_filename, 'w') as config_file:
@@ -105,14 +103,14 @@ for extractor in tqdm(feature_extractors):
         # wait
         #         """
         job_script = f"""#!/bin/bash
-#SBATCH --job-name={cohort}-{extractor}-preprocess
-#SBATCH --output="outs/stamp_preprocess_{extractor}_{cohort}_{args.magnification}x_%j.out"
+#SBATCH --job-name={cohort}-{extractor}-cptac-preprocess
+#SBATCH --output="outs/cptac-stamp_preprocess_{extractor}_{cohort}_{args.magnification}x_%j.out"
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=14
-#SBATCH --mem=500G
-#SBATCH --time=8:00:00
+#SBATCH --mem=100G
+#SBATCH --time=14:00:00
 #SBATCH --account=p_scads_pathology
 #SBATCH --partition=capella
 
